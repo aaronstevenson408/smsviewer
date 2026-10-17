@@ -1308,12 +1308,12 @@ async function exportSelectedPDF() {
     doc.save(`Messages_${safeName}.pdf`);
 
     const replacementCount = replacedEmoji + replacedUnsupported;
-    const embeddedImages = messages.flatMap((m) =>
-        (m.attachments || []).filter((a) =>
-            String(a.contentType || "").startsWith("image/") &&
-            getJsPDFFormat(a.contentType) && a.data
-        ).length
-    );
+    const embeddedImages = messages.reduce((count, m) => {
+        return count + (m.attachments || []).filter((a) => {
+            const ct = String(a.contentType || "");
+            return ct.startsWith("image/") && a.data;
+        }).length;
+    }, 0);
     if (replacementCount || embeddedImages) {
         const parts = [];
         if (embeddedImages) parts.push(`${Core.formatNumber(embeddedImages)} image(s) embedded`);
